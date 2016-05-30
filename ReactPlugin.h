@@ -6,7 +6,6 @@
 //  Copyright © 2016 Facebook. All rights reserved.
 //
 
-#import <UIKit/UIKit.h>
 #import <Foundation/Foundation.h>
 #import <RCTBridgeModule.h>
 #import <Appodeal/Appodeal.h>
@@ -14,10 +13,12 @@
 #import <Appodeal/AppodealNativeAdService.h>
 
 //plugin
-@interface ReactMediationAdapter : NSObject <RCTBridgeModule,AppodealNativeAdServiceDelegate>
+@interface ReactPlugin : NSObject <RCTBridgeModule,AppodealNativeAdServiceDelegate,AppodealNativeAdDelegate,AppodealBannerDelegate,AppodealInterstitialDelegate,AppodealVideoDelegate,AppodealRewardedVideoDelegate,AppodealBannerViewDelegate>
 
 @property (nonatomic, strong) AppodealNativeAdService* adService;
 @property (nonatomic, strong) AppodealNativeAd* ad;
 @property (nonatomic, strong) AppodealNativeAdViewAttributes* attributes;
+@property (nonatomic, strong) AppodealBannerView *bannerView;
+@property (nonatomic, strong) AppodealNativeMediaView *mediaView;
 
 @end

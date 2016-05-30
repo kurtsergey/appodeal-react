@@ -12,12 +12,100 @@ import {
   Text,
   TouchableHighlight,
   View,
-  NativeModules
+  NativeModules,
+  NativeAppEventEmitter
 } from 'react-native';
 
 var AppodealPlugin = NativeModules.ReactPlugin;
 
-class demoAppodeal extends Component {
+
+//Example, how to subscribe callbacks
+//First: set delegation
+// AppodealPlugin.setBannerDelegate();
+//Second: add listener to js, where bannerDidLoadAd is the name of callback
+// NativeAppEventEmitter.addListener(
+//   'bannerDidLoadAd',
+//   (reminder) => {
+//       console.log("bannerDidLoadAd")
+//   }
+// );
+// Callbacks:
+// (void)bannerDidLoadAd;
+// (void)bannerDidFailToLoadAd;
+// (void)bannerDidClick;
+// (void)bannerDidShow;
+
+// AppodealPlugin.setInterstitialDelegate();
+// (void)interstitialDidLoadAd;
+// (void)interstitialDidFailToLoadAd;
+// (void)interstitialWillPresent;
+// (void)interstitialDidDismiss;
+// (void)interstitialDidClick;
+
+// AppodealPlugin.setVideoDelegate();
+// (void)videoDidLoadAd;
+// (void)videoDidFailToLoadAd;
+// (void)videoDidPresent;
+// (void)videoWillDismiss;
+// (void)videoDidFinish;
+// (void)videoDidClick;
+
+// AppodealPlugin.setRewardedVideoDelegate();
+// (void)rewardedVideoDidLoadAd;
+// (void)rewardedVideoDidFailToLoadAd;
+// (void)rewardedVideoDidPresent;
+// (void)rewardedVideoWillDismiss;
+// (void)rewardedVideoDidFinish:(NSUInteger)rewardAmount name:(NSString *)rewardName;
+// (void)rewardedVideoDidClick;
+
+//Callbacks for AppodealNativeAd
+// (void)nativeAdDidClick;
+// (void)nativeAdDidPresent;
+// (void)nativeAdServiceDidLoad:;
+// (void)nativeAdServiceDidFailedToLoad;
+
+//TODO AppodealBannerViewDelegate
+// (void) bannerViewDidLoadAd
+// (void) bannerView
+// (void) bannerViewDidInteract
+// AppodealNativeMediaViewDelegate
+// (void) mediaViewReady;
+// (void) mediaViewError;
+// (void) mediaViewStartPlaying;
+// (void) mediaViewPresentFullScreen;
+// (void) mediaViewCompleteVideoPlaying;
+// (void) mediaViewSkip;
+
+NativeAppEventEmitter.addListener(
+  'bannerDidShow',
+  (reminder) => {
+      console.log("bannerDidShow")
+  }
+);
+
+NativeAppEventEmitter.addListener(
+  'bannerDidClick',
+  (reminder) => {
+      console.log("bannerDidClick")
+  }
+);
+
+NativeAppEventEmitter.addListener(
+  'videoDidFinish',
+  (reminder) => {
+      console.log("videoDidFinish")
+  }
+);
+
+NativeAppEventEmitter.addListener(
+  'nativeAdServiceDidLoad',
+  (reminder) => {
+      console.log("nativeAdServiceDidLoad")
+  }
+);
+
+
+class demog extends Component {
 
   // <Text style={styles.buttonText}>
   //   {this.state.property1}
@@ -422,7 +510,6 @@ class demoAppodeal extends Component {
  * @param {JSON} json - see the json type of UIColor class in RCTConvert.h
  */
 
-
   pressButton1 () {
     AppodealPlugin.initializeWithApiKey("dee74c5129f53fc629a44a690a02296694e3eef99f2d3a5f","AppodealAdTypeAll");
   }
@@ -433,6 +520,9 @@ class demoAppodeal extends Component {
         console.log(result);
       }
     );
+
+    AppodealPlugin.banner();
+
   }
 
   pressButton3 () {
@@ -474,6 +564,12 @@ class demoAppodeal extends Component {
 
   pressButton11 () {
     AppodealPlugin.deinitialize();
+  }
+
+  pressButton12 () {
+    AppodealPlugin.setBannerDelegate();
+    AppodealPlugin.setVideoDelegate();
+    AppodealPlugin.setRewardedVideoDelegate();
   }
 
   render() {
@@ -529,6 +625,11 @@ class demoAppodeal extends Component {
             DEINITIALIZE
           </Text>
         </TouchableHighlight>
+        <TouchableHighlight onPress={this.pressButton12} style={styles.button} >
+          <Text style={styles.buttonText}>
+            DELEGATE
+          </Text>
+        </TouchableHighlight>
       </View>
     );
   }
@@ -557,4 +658,4 @@ const styles = StyleSheet.create({
   }
 });
 
-AppRegistry.registerComponent('demoAppodeal', () => demoAppodeal);
+AppRegistry.registerComponent('demog', () => demog);
