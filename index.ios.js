@@ -12,12 +12,15 @@ import {
   Text,
   TouchableHighlight,
   View,
-  NativeModules,
-  NativeAppEventEmitter
+  NativeModules, //to access plugin
+  NativeAppEventEmitter, //callbacks
+  requireNativeComponent //to import in pressButton9
 } from 'react-native';
 
-var AppodealPlugin = NativeModules.ReactPlugin;
+var AppodealPlugin = NativeModules.ReactPlugin; //appodeal plugin
+var NativeAdViewManagerPlugin = NativeModules.AppodealNativeAdViewManager; //native ad plugin
 
+var AppodealNativeAdView; //view to render
 
 //Example, how to subscribe callbacks
 //First: set delegation
@@ -58,7 +61,7 @@ var AppodealPlugin = NativeModules.ReactPlugin;
 // (void)rewardedVideoDidFinish:(NSUInteger)rewardAmount name:(NSString *)rewardName;
 // (void)rewardedVideoDidClick;
 
-//Callbacks for AppodealNativeAd
+//Callbacks for AppodealNativeAd (whithout "setting method")
 // (void)nativeAdDidClick;
 // (void)nativeAdDidPresent;
 // (void)nativeAdServiceDidLoad:;
@@ -76,6 +79,14 @@ var AppodealPlugin = NativeModules.ReactPlugin;
 // (void) mediaViewCompleteVideoPlaying;
 // (void) mediaViewSkip;
 
+//Banner callbacks
+NativeAppEventEmitter.addListener(
+  'bannerDidLoadAd',
+  (reminder) => {
+      console.log("bannerDidLoadAd")
+  }
+);
+
 NativeAppEventEmitter.addListener(
   'bannerDidShow',
   (reminder) => {
@@ -91,6 +102,72 @@ NativeAppEventEmitter.addListener(
 );
 
 NativeAppEventEmitter.addListener(
+  'bannerDidFailToLoadAd',
+  (reminder) => {
+      console.log("bannerDidFailToLoadAd")
+  }
+);
+
+//Interstitial callbacks
+NativeAppEventEmitter.addListener(
+  'interstitialDidLoadAd',
+  (reminder) => {
+      console.log("interstitialDidLoadAd")
+  }
+);
+
+NativeAppEventEmitter.addListener(
+  'interstitialDidFailToLoadAd',
+  (reminder) => {
+      console.log("interstitialDidFailToLoadAd")
+  }
+);
+
+NativeAppEventEmitter.addListener(
+  'interstitialDidDismiss',
+  (reminder) => {
+      console.log("interstitialDidDismiss")
+  }
+);
+
+NativeAppEventEmitter.addListener(
+  'interstitialDidClick',
+  (reminder) => {
+      console.log("interstitialDidClick")
+  }
+);
+
+
+//Video callbacks
+NativeAppEventEmitter.addListener(
+  'videoDidLoadAd',
+  (reminder) => {
+      console.log("videoDidLoadAd")
+  }
+);
+
+NativeAppEventEmitter.addListener(
+  'videoDidFailToLoadAd',
+  (reminder) => {
+      console.log("videoDidFailToLoadAd")
+  }
+);
+
+NativeAppEventEmitter.addListener(
+  'videoDidPresent',
+  (reminder) => {
+      console.log("videoDidPresent")
+  }
+);
+
+NativeAppEventEmitter.addListener(
+  'videoWillDismiss',
+  (reminder) => {
+      console.log("videoWillDismiss")
+  }
+);
+
+NativeAppEventEmitter.addListener(
   'videoDidFinish',
   (reminder) => {
       console.log("videoDidFinish")
@@ -98,12 +175,85 @@ NativeAppEventEmitter.addListener(
 );
 
 NativeAppEventEmitter.addListener(
+  'videoDidClick',
+  (reminder) => {
+      console.log("videoDidClick")
+  }
+);
+
+
+//Rewarded video callbacks
+NativeAppEventEmitter.addListener(
+  'rewardedVideoDidLoadAd',
+  (reminder) => {
+      console.log("rewardedVideoDidLoadAd")
+  }
+);
+
+NativeAppEventEmitter.addListener(
+  'rewardedVideoDidFailToLoadAd',
+  (reminder) => {
+      console.log("rewardedVideoDidFailToLoadAd")
+  }
+);
+
+NativeAppEventEmitter.addListener(
+  'rewardedVideoDidPresent',
+  (reminder) => {
+      console.log("rewardedVideoDidPresent")
+  }
+);
+
+NativeAppEventEmitter.addListener(
+  'rewardedVideoWillDismiss',
+  (reminder) => {
+      console.log("rewardedVideoWillDismiss")
+  }
+);
+
+NativeAppEventEmitter.addListener(
+  'rewardedVideoDidFinish',
+  (reminder) => {
+      console.log("rewardedVideoDidFinish")
+  }
+);
+
+NativeAppEventEmitter.addListener(
+  'rewardedVideoDidClick',
+  (reminder) => {
+      console.log("rewardedVideoDidClick")
+  }
+);
+
+
+//Callbacks for Natvive ad
+NativeAppEventEmitter.addListener(
   'nativeAdServiceDidLoad',
   (reminder) => {
       console.log("nativeAdServiceDidLoad")
   }
 );
 
+NativeAppEventEmitter.addListener(
+  'nativeAdDidClick',
+  (reminder) => {
+      console.log("nativeAdDidClick")
+  }
+);
+
+NativeAppEventEmitter.addListener(
+  'nativeAdServiceDidFailedToLoad',
+  (reminder) => {
+      console.log("nativeAdServiceDidFailedToLoad")
+  }
+);
+
+NativeAppEventEmitter.addListener(
+  'nativeAdDidPresent',
+  (reminder) => {
+      console.log("nativeAdDidPresent")
+  }
+);
 
 class demog extends Component {
 
@@ -113,10 +263,12 @@ class demog extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      property1: 'NAME OF PROPERTY'
+      property1: 'NAME OF PROPERTY',
+      showView: false
     };
   }
 
+//Methods for AppodealPlugin
 /**
  * @method disableNetworkForAdType
  * @return {void}
@@ -420,23 +572,35 @@ class demog extends Component {
  * @example AppodealPlugin.setUserInterests("programming");
  */
 
+
+//Methods for NativeAdViewManagerPlugin   ******************************************************************************************************
 /**
  * @method loadNativeAd
  * @return {void}
- * @example AppodealPlugin.loadNativeAd();
+ * @param {integer} x - coordinates on view(AppodealNativeAdView)
+ * @param {integer} y - coordinates on view(AppodealNativeAdView)
+ * @param {string} adViewType - AppodealNativeAdViewType
+ *  AppodealNativeAdTypeNewsFeed
+ *  AppodealNativeAdTypeContentStream
+ *  AppodealNativeAdType320x50
+ *  AppodealNativeAdType728x90
+ * @example NativeAdViewManagerPlugin.loadNativeAd(0,0, "AppodealNativeAdTypeContentStream");
  */
 
 /**
- * @method showNativeAd
- * @return {void}
- * @param {integer} x - coordinates on view
- * @param {integer} y - coordinates on view
- * @param {string} adViewType - AppodealNativeAdViewType
-    AppodealNativeAdTypeNewsFeed
-    AppodealNativeAdTypeContentStream
-    AppodealNativeAdType320x50, 
-    AppodealNativeAdType728x90
- * @example AppodealPlugin.showNativeAd(40,50,"AppodealNativeAdTypeContentStream");
+ * @description How to show native ad
+   1) Insert the view anywhere in the render method
+        {this.state.showView ? <AppodealNativeAdView style={{width: 320, height: 320, margin:10}} /> : null}
+   2) Set property (see constructor(props))
+        showView: false
+   3) Import plugin(view) locally(for example in pressButton9) to return instance of view and set showView to true
+        AppodealNativeAdView = requireNativeComponent('AppodealNativeAdView', null);
+        this.setState({showView: true});
+
+   AppodealNativeAdView is the view to render in render() method
+   Native ad view is attached to AppodealNativeAdView
+
+   Before loadNativeAd, you should to install the properties of native ad view(see below)
  */
 
 /**
@@ -444,21 +608,21 @@ class demog extends Component {
  * @return {void}
  * @param {integer} width
  * @param {integer} height
- * @example AppodealPlugin.setNativeAdAttributes_width_height(320,50);
+ * @example NativeAdViewManagerPlugin.setNativeAdAttributes_width_height(320,50);
  */
 
 /**
  * @method setNativeAdAttributes_roundedIcon
  * @return {void}
  * @param {boolean} roundedIcon
- * @example AppodealPlugin.setNativeAdAttributes_roundedIcon(true);
+ * @example NativeAdViewManagerPlugin.setNativeAdAttributes_roundedIcon(true);
  */
 
 /**
  * @method setNativeAdAttributes_sponsored
  * @return {void}
  * @param {boolean} sponsored
- * @example AppodealPlugin.setNativeAdAttributes_sponsored(false);
+ * @example NativeAdViewManagerPlugin.setNativeAdAttributes_sponsored(false);
  */
 
 
@@ -511,37 +675,60 @@ class demog extends Component {
  */
 
   pressButton1 () {
-    AppodealPlugin.initializeWithApiKey("dee74c5129f53fc629a44a690a02296694e3eef99f2d3a5f","AppodealAdTypeAll");
+    AppodealPlugin.disableNetworkForAdType("AppodealAdTypeAll","kAppodealAdMobNetworkName");
   }
 
   pressButton2 () {
+    AppodealPlugin.initializeWithApiKey("dee74c5129f53fc629a44a690a02296694e3eef99f2d3a5f","AppodealAdTypeAll");
+  }
+
+  pressButton3 () {
+    AppodealPlugin.setBannerDelegate();
+    AppodealPlugin.setVideoDelegate();
+    AppodealPlugin.setInterstitialDelegate();
+    AppodealPlugin.setRewardedVideoDelegate();
+  }
+
+  pressButton4 () {
     AppodealPlugin.showAd("AppodealShowStyleBannerTop",
       (result) => {
         console.log(result);
       }
     );
-
-    AppodealPlugin.banner();
-
-  }
-
-  pressButton3 () {
-    AppodealPlugin.loadNativeAd();
-  }
-
-  pressButton4 () {
-    AppodealPlugin.showNativeAd(10,400, "AppodealNativeAdTypeContentStream");
   }
 
   pressButton5 () {
-    AppodealPlugin.disableNetworkForAdType("AppodealAdTypeAll","kAppodealAdMobNetworkName");
+    AppodealPlugin.showAd("AppodealShowStyleInterstitial",
+      (result) => {
+        console.log(result);
+      }
+    );
+  }
+
+  pressButton6 () {
+    AppodealPlugin.showAd("AppodealShowStyleRewardedVideo",
+      (result) => {
+        console.log(result);
+      }
+    );
   }
 
   pressButton7 () {
-    AppodealPlugin.setNativeAdAttributes_width_height(320,50);
+    NativeAdViewManagerPlugin.setNativeAdAttributes_width_height(320,50);
+    //deprecated
+    NativeAdViewManagerPlugin.setNativeAdAttributes_titleColor_descriptionColor(0,0,255,0.5,0,0,255,0.5);
   }
 
-  pressButton8() {
+  pressButton8 () {
+    NativeAdViewManagerPlugin.loadNativeAd(0,0, "AppodealNativeAdTypeContentStream");
+  }
+
+  pressButton9() {
+    AppodealNativeAdView = requireNativeComponent('AppodealNativeAdView', null);
+    this.setState({showView: true});
+  }
+
+  pressButton10() {
     AppodealPlugin.isAutocacheEnabled ("AppodealAdTypeAll",
       (result) => {
         console.log(result);
@@ -549,8 +736,7 @@ class demog extends Component {
     )
   }
 
-  pressButton9() {
-
+  pressButton11 () {
     AppodealPlugin.getVersion (
       (result) => {
         console.log(result);
@@ -558,78 +744,74 @@ class demog extends Component {
       )
   }
 
-  pressButton10 () {
-    AppodealPlugin.setAutocache(true, "AppodealAdTypeAll");
-  }
-
-  pressButton11 () {
-    AppodealPlugin.deinitialize();
-  }
-
   pressButton12 () {
-    AppodealPlugin.setBannerDelegate();
-    AppodealPlugin.setVideoDelegate();
-    AppodealPlugin.setRewardedVideoDelegate();
+    AppodealPlugin.deinitialize();
   }
 
   render() {
     return (
       <View style={styles.container}>
-        <TouchableHighlight onPress={this.pressButton1} style={styles.button} >
+        <TouchableHighlight onPress={() => this.pressButton1()} style={styles.button} >
+          <Text style={styles.buttonText}>
+            DISABLE NETWORK
+          </Text>
+        </TouchableHighlight>
+        <TouchableHighlight onPress={() => this.pressButton2()} style={styles.button} >
           <Text style={styles.buttonText}>
             INITIALIZE
           </Text>
         </TouchableHighlight>
-        <TouchableHighlight onPress={this.pressButton2} style={styles.button} >
-          <Text style={styles.buttonText}>
-            SHOW
-          </Text>
-        </TouchableHighlight>
-        <TouchableHighlight onPress={this.pressButton3} style={styles.button} >
-          <Text style={styles.buttonText}>
-            LOAD_NATIVEAD
-          </Text>
-        </TouchableHighlight>
-        <TouchableHighlight onPress={this.pressButton4} style={styles.button} >
-          <Text style={styles.buttonText}>
-            SHOW_NATIVEAD
-          </Text>
-        </TouchableHighlight>
-        <TouchableHighlight onPress={this.pressButton5} style={styles.button} >
-          <Text style={styles.buttonText}>
-            DISABLE_NETWORK
-          </Text>
-        </TouchableHighlight>
-        <TouchableHighlight onPress={this.pressButton7} style={styles.button} >
-          <Text style={styles.buttonText}>
-            SET_ATTRIBUTES_WIDTH_HEIGHT
-          </Text>
-        </TouchableHighlight>
-        <TouchableHighlight onPress={this.pressButton8} style={styles.button} >
-          <Text style={styles.buttonText}>
-            isAutocacheEnabled
-          </Text>
-        </TouchableHighlight>
-        <TouchableHighlight onPress={this.pressButton9} style={styles.button} >
-          <Text style={styles.buttonText}>
-            GET_VERSION
-          </Text>
-        </TouchableHighlight>
-        <TouchableHighlight onPress={this.pressButton10} style={styles.button} >
-          <Text style={styles.buttonText}>
-            setAutocache
-          </Text>
-        </TouchableHighlight>
-        <TouchableHighlight onPress={this.pressButton11} style={styles.button} >
-          <Text style={styles.buttonText}>
-            DEINITIALIZE
-          </Text>
-        </TouchableHighlight>
-        <TouchableHighlight onPress={this.pressButton12} style={styles.button} >
+        <TouchableHighlight onPress={() => this.pressButton3()} style={styles.button} >
           <Text style={styles.buttonText}>
             DELEGATE
           </Text>
         </TouchableHighlight>
+        <TouchableHighlight onPress={() => this.pressButton4()} style={styles.button} >
+          <Text style={styles.buttonText}>
+            SHOW BANNER
+          </Text>
+        </TouchableHighlight>
+        <TouchableHighlight onPress={() => this.pressButton5()} style={styles.button} >
+          <Text style={styles.buttonText}>
+            SHOW INTERSTITIAL
+          </Text>
+        </TouchableHighlight>
+        <TouchableHighlight onPress={() => this.pressButton6()} style={styles.button} >
+          <Text style={styles.buttonText}>
+            SHOW VIDEO
+          </Text>
+        </TouchableHighlight>
+        <TouchableHighlight onPress={() => this.pressButton7()} style={styles.button} >
+          <Text style={styles.buttonText}>
+            SET WIDTH HEIGHT
+          </Text>
+        </TouchableHighlight>
+        <TouchableHighlight onPress={() => this.pressButton8()} style={styles.button} >
+          <Text style={styles.buttonText}>
+            LOAD NATIVE AD
+          </Text>
+        </TouchableHighlight>
+        <TouchableHighlight onPress={() => this.pressButton9()} style={styles.button} >
+          <Text style={styles.buttonText}>
+            SHOW NATIVE AD
+          </Text>
+        </TouchableHighlight>
+        <TouchableHighlight onPress={() => this.pressButton10()} style={styles.button} >
+          <Text style={styles.buttonText}>
+            isAutocacheEnabled
+          </Text>
+        </TouchableHighlight>
+        <TouchableHighlight onPress={() => this.pressButton11()} style={styles.button} >
+          <Text style={styles.buttonText}>
+            GET VERSION
+          </Text>
+        </TouchableHighlight>
+        <TouchableHighlight onPress={() => this.pressButton12()} style={styles.button} >
+          <Text style={styles.buttonText}>
+            DEINITIALIZE
+          </Text>
+        </TouchableHighlight>
+        {this.state.showView ? <AppodealNativeAdView style={{width: 320, height: 320, margin:10}} /> : null}
       </View>
     );
   }
@@ -638,9 +820,9 @@ class demog extends Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
+    margin:90,
+    justifyContent: 'flex-start',
     alignItems: 'center',
-    backgroundColor: '#F5FCFF',
   },
   button:{
     height:20,

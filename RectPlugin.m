@@ -1,5 +1,5 @@
 //
-//  ReactMediationAdapter.m
+//  ReactPlugin.m
 //  demoAppodeal
 //
 //  Created by Denis on 26.05.16.
@@ -152,12 +152,6 @@ RCT_EXPORT_METHOD(setRewardedVideoDelegate)
     });
 }
 
--(AppodealNativeAdViewAttributes *) attributes
-{
-    if(!_attributes) _attributes=[[AppodealNativeAdViewAttributes alloc] init];
-    return _attributes;
-}
-
 - (AppodealAdType)appodealAdTypeConvert:(NSString*) adType
 {
     AppodealAdType type=AppodealAdTypeAll;
@@ -210,11 +204,11 @@ RCT_EXPORT_METHOD(setRewardedVideoDelegate)
 
 RCT_EXPORT_METHOD(initializeWithApiKey:(NSString *)appKey types:(NSString *)adType)
 {
+    //RCTLogInfo(@"NOT READY %@ %@", name, location);
+    
     //main thread
     dispatch_async(dispatch_get_main_queue(), ^{
         [Appodeal initializeWithApiKey:appKey types:[self appodealAdTypeConvert:adType]];
-        //    id rootVC = [[[[[UIApplication sharedApplication] keyWindow] subviews] objectAtIndex:0] nextResponder];
-        //    RCTLogInfo(@"NOT READY %@ %@", name, location);
     });
 }
 
@@ -272,171 +266,9 @@ RCT_EXPORT_METHOD(isReadyWithPriceFloorForShowWithStyle:(NSString *)showType res
     });
 }
 
-RCT_EXPORT_METHOD(loadNativeAd)
-{
-    dispatch_async(dispatch_get_main_queue(), ^{
-        self.adService = [[AppodealNativeAdService alloc] init];
-        self.adService.delegate = self;
-        [self.adService loadAd];
-    });
-}
-
-- (void)nativeAdServiceDidLoad: (AppodealNativeAd*) nativeAd{
-    self.ad = nativeAd;
-    [self.bridge.eventDispatcher sendAppEventWithName:@"nativeAdServiceDidLoad" body:@{@"":@""}];
-}
-
-- (void)nativeAdServiceDidFailedToLoad
-{
-    [self.bridge.eventDispatcher sendAppEventWithName:@"nativeAdServiceDidFailedToLoad" body:@{@"":@""}];
-}
-
-- (void)nativeAdDidClick:(AppodealNativeAd *)nativeAd
-{
-    [self.bridge.eventDispatcher sendAppEventWithName:@"nativeAdDidClick" body:@{@"":@""}];
-}
-
-- (void)nativeAdDidPresent:(AppodealNativeAd *)nativeAd
-{
-    [self.bridge.eventDispatcher sendAppEventWithName:@"nativeAdDidPresent" body:@{@"":@""}];
-}
-
-RCT_EXPORT_METHOD(loadBunnerAd:(int)x y:(int)y adType:(NSString *)adType)
-{
-    
-}
-
 RCT_EXPORT_METHOD(banner)
 {
-    UIView *vv= [Appodeal banner];
-    
-    //  [vv setFrame: CGRectMake(50,60, 320, 50)];
-    //  [[[UIApplication sharedApplication] keyWindow].rootViewController.view addSubview: vv];
-}
-
-
-
-//- (void)bannerViewDidLoadAd:(AppodealBannerView *)bannerView;
-//
-//- (void)bannerView:(AppodealBannerView *)bannerView didFailToLoadAdWithError:(NSError *)error;
-//
-//- (void)bannerViewDidInteract:(AppodealBannerView *)bannerView;
-
-
-////not to load twice
-//if (self.bannerView==nil) {
-//  self.bannerView = [[AppodealBannerView alloc] initWithSize:kAppodealUnitSize_320x50 rootViewController:self];
-//  self.bannerView.delegate = self;
-//  [self.view addSubview:self.bannerView];
-//  [self.bannerView loadAd];
-//}
-//
-//[Appodeal showAd:AppodealShowStyleBannerTop rootViewController:self];
-
-RCT_EXPORT_METHOD(showNativeAd:(int)x y:(int)y adType:(NSString *)adType)
-{
-    NSInteger adtype=1;
-    if([adType isEqualToString:@"AppodealNativeAdTypeNewsFeed"])
-        adtype=AppodealNativeAdTypeNewsFeed;
-    if([adType isEqualToString:@"AppodealNativeAdTypeContentStream"])
-        adtype=AppodealNativeAdTypeContentStream;
-    if([adType isEqualToString:@"AppodealNativeAdType320x50"])
-        adtype=AppodealNativeAdType320x50;
-    if([adType isEqualToString:@"AppodealNativeAdType728x90"])
-        adtype=AppodealNativeAdType728x90;
-    
-    dispatch_async(dispatch_get_main_queue(), ^{
-        AppodealNativeAdView* adView = [AppodealNativeAdView nativeAdViewWithType:adtype andNativeAd:self.ad andAttributes:self.attributes rootViewController:[[UIApplication sharedApplication] keyWindow].rootViewController];
-        [adView setFrame: CGRectMake(x,y, self.attributes.width, self.attributes.heigth)];
-        [[[UIApplication sharedApplication] keyWindow].rootViewController.view addSubview: adView];
-    });
-}
-
-RCT_EXPORT_METHOD(setNativeAdAttributes_width_height:(int)width heigth:(int)height)
-{
-    dispatch_async(dispatch_get_main_queue(), ^{
-        self.attributes.width=width;
-        self.attributes.heigth=height;
-    });
-}
-RCT_EXPORT_METHOD(setNativeAdAttributes_roundedIcon:(BOOL)value)
-{
-    dispatch_async(dispatch_get_main_queue(), ^{
-        self.attributes.roundedIcon=value;
-    });
-}
-RCT_EXPORT_METHOD(setNativeAdAttributes_sponsored:(BOOL)value)
-{
-    dispatch_async(dispatch_get_main_queue(), ^{
-        self.attributes.sponsored=value;
-    });
-}
-RCT_EXPORT_METHOD(setNativeAdAttributes_titleFont:(id)json)
-{
-    dispatch_async(dispatch_get_main_queue(), ^{
-        self.attributes.titleFont=[RCTConvert UIFont:json];
-    });
-}
-RCT_EXPORT_METHOD(setNativeAdAttributes_descriptionFont:(id)json)
-{
-    dispatch_async(dispatch_get_main_queue(), ^{
-        self.attributes.descriptionFont=[RCTConvert UIFont:json];
-    });
-}
-RCT_EXPORT_METHOD(setNativeAdAttributes_subtitleFont:(id)json)
-{
-    dispatch_async(dispatch_get_main_queue(), ^{
-        self.attributes.subtitleFont=[RCTConvert UIFont:json];
-    });
-}
-RCT_EXPORT_METHOD(setNativeAdAttributes_buttonTitleFont:(id)json)
-{
-    dispatch_async(dispatch_get_main_queue(), ^{
-        self.attributes.buttonTitleFont=[RCTConvert UIFont:json];
-    });
-}
-
-RCT_EXPORT_METHOD(setNativeAdAttributes_titleFontColor:(id)json)
-{
-    dispatch_async(dispatch_get_main_queue(), ^{
-        self.attributes.titleFontColor=[RCTConvert UIColor:json];
-    });
-}
-RCT_EXPORT_METHOD(setNativeAdAttributes_descriptionFontColor:(id)json)
-{
-    dispatch_async(dispatch_get_main_queue(), ^{
-        self.attributes.descriptionFontColor=[RCTConvert UIColor:json];
-    });
-}
-RCT_EXPORT_METHOD(setNativeAdAttributes_subtitleColor:(id)json)
-{
-    dispatch_async(dispatch_get_main_queue(), ^{
-        self.attributes.subtitleColor=[RCTConvert UIColor:json];
-    });
-}
-RCT_EXPORT_METHOD(setNativeAdAttributes_buttonColor:(id)json)
-{
-    dispatch_async(dispatch_get_main_queue(), ^{
-        self.attributes.buttonColor=[RCTConvert UIColor:json];
-    });
-}
-RCT_EXPORT_METHOD(setNativeAdAttributes_starRatingColor:(id)json)
-{
-    dispatch_async(dispatch_get_main_queue(), ^{
-        self.attributes.starRatingColor=[RCTConvert UIColor:json];
-    });
-}
-
-//ex
-RCT_EXPORT_METHOD(setNativeAdAttributes_titleColor_descriptionColor:(float)tR tG:(float)tG tB:(float)tB tA:(float)tA dR:(float)dR dG:(float)dG dB:(float)dB dA:(float)dA)
-{
-    dispatch_async(dispatch_get_main_queue(), ^{
-        self.attributes.titleFont=[UIFont boldSystemFontOfSize:12];
-        self.attributes.roundedIcon = YES;
-        self.attributes.sponsored = YES;
-        self.attributes.titleFontColor=[UIColor colorWithRed:tR green:tG blue:tB alpha:tA];
-        self.attributes.descriptionFontColor=[UIColor colorWithRed:dR green:dG blue:dB alpha:dA];
-    });
+    UIView *v= [Appodeal banner];
 }
 
 RCT_EXPORT_METHOD(disableLocationPermissionCheck)
@@ -448,13 +280,14 @@ RCT_EXPORT_METHOD(disableLocationPermissionCheck)
 
 RCT_EXPORT_METHOD(isAutocacheEnabled:(NSString *)adType calls:(RCTResponseSenderBlock)callback)
 {
+    //NSArray *events = @[@"1", @"2", @"3""];
+    //callback(@[[NSNull null], events]);
+    
     dispatch_async(dispatch_get_main_queue(), ^{
         if([Appodeal isAutocacheEnabled:[self appodealAdTypeConvert:adType]])
             callback(@[@YES]);
         else
             callback(@[@NO]);
-        //      NSArray *events = @[@"1", @"2", @"3""];
-        //      callback(@[[NSNull null], events]);
     });
 }
 
