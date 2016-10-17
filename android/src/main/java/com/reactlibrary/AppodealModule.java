@@ -22,6 +22,7 @@ import com.appodeal.ads.NonSkippableVideoCallbacks;
 import com.appodeal.ads.RewardedVideoCallbacks;
 import com.appodeal.ads.SkippableVideoCallbacks;
 import com.appodeal.ads.utils.PermissionsHelper.AppodealPermissionCallbacks;
+import com.appodeal.ads.utils.Log;
 
 public class AppodealModule extends ReactContextBaseJavaModule implements InterstitialCallbacks, BannerCallbacks, SkippableVideoCallbacks, NonSkippableVideoCallbacks, RewardedVideoCallbacks, AppodealPermissionCallbacks{
 
@@ -82,6 +83,9 @@ public class AppodealModule extends ReactContextBaseJavaModule implements Inters
 	constants.put("RELATION_OTHER", UserSettings.Relation.OTHER.name());
 	constants.put("RELATION_SEARCHING", UserSettings.Relation.SEARCHING.name());
 	constants.put("RELATION_SINGLE", UserSettings.Relation.SINGLE.name());
+	constants.put("LOG_LEVEL_VERBOSE", Log.LogLevel.verbose.name());
+	constants.put("LOG_LEVEL_DEBUG", Log.LogLevel.debug.name());
+	constants.put("LOG_LEVEL_NONE", Log.LogLevel.none.name());
     return constants;
   }
   
@@ -188,8 +192,8 @@ public class AppodealModule extends ReactContextBaseJavaModule implements Inters
   }
   
   @ReactMethod
-  public void setLogging(boolean flag){
-	Appodeal.setLogging(flag);
+  public void setLogLevel(String level){
+	Appodeal.setLogLevel(Log.LogLevel.valueOf(level));
   }
   
   @ReactMethod

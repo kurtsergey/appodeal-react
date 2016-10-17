@@ -178,7 +178,10 @@ In test mode test ads will be shown and debug data will be written to logcat
 #### Enabling logging
 
 ```
-Appodeal.setLogging(true)
+Appodeal.setLogLevel(Appodeal.LOG_LEVEL_VERBOSE);
+
+Possible values: Appodeal.LOG_LEVEL_VERBOSE, Appodeal.LOG_LEVEL_DEBUG, Appodeal.LOG_LEVEL_NONE.
+
 ```
 Enable debug logging to logcat using tag "Appodeal"
 
