@@ -1,9 +1,3 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- * @flow
- */
-
 import React, { Component } from 'react';
 import {
     AppRegistry,
@@ -13,15 +7,18 @@ import {
     View,
     NativeModules, //plugin
     NativeAppEventEmitter, //callbacks
+    requireNativeComponent
 } from 'react-native';
 
 var Appodeal = NativeModules.AppodealPlugin;
-
+var NativeAdViewManagerPlugin = NativeModules.AppodealNativeAdViewManager; //native ad plugin		 +
+var AppodealNativeAdView;
 var INTERSTITIAL = 1;
 var SKIPPABLE_VIDEO = 2;
 var BANNER = 4;
 var BANNER_BOTTOM = 8;
 var BANNER_TOP = 16;
+var NATIVE_AD = 32;
 var REWARDED_VIDEO = 128;
 var NON_SKIPPABLE_VIDEO = 256;
 
@@ -220,23 +217,73 @@ NativeAppEventEmitter.addListener(
                                   console.log("onRewardedVideoClicked")
                                   }
                                   );
+NativeAppEventEmitter.addListener(
+                                  'onMediaViewStartPlaying',
+                                  (reminder) => {
+                                  console.log("onMediaViewStartPlaying")
+                                  }
+                                  );
+
+NativeAppEventEmitter.addListener(
+                                  'onMediaViewFinishPlaying',
+                                  (reminder) => {
+                                  console.log("onMediaViewFinishPlayingWasSkipped")
+                                  }
+                                  );
+
+NativeAppEventEmitter.addListener(
+                                  'onMediaViewDidPresentFullScreenView',
+                                  (reminder) => {
+                                  console.log("onMediaViewDidPresentFullScreenView")
+                                  }
+                                  );
+NativeAppEventEmitter.addListener(
+                                  'onMediaViewDidDismissFullScreen',
+                                  (reminder) => {
+                                  console.log("onMediaViewDidDismissFullScreen")
+                                  }
+                                  );
+
+NativeAppEventEmitter.addListener(
+                                  'onNativeAdDidLoad',
+                                  (reminder) => {
+                                  console.log("nativeTitle: " + reminder.nativeTitle)
+                                  console.log("nativeSubtitle: " + reminder.nativeSubtitle)
+                                  console.log("nativeDescriptionText: " + reminder.nativeDescriptionText)
+                                  console.log("nativeStarRating: " + reminder.nativeStarRating)
+                                  console.log("nativeCallToActionText: " + reminder.nativeCallToActionText)
+                                  console.log("nativeContentRating: " + reminder.nativeContentRating)
+                                  console.log("nativeImageUrl: " + reminder.nativeImageUrl)
+                                  console.log("nativeImageHeight: " + reminder.nativeImageHeight)
+                                  console.log("nativeImageWidth: " + reminder.nativeImageWidth)
+                                  console.log("nativeIconImageHeight: " + reminder.nativeIconImageHeight)
+                                  console.log("nativeIconImageWidth: " + reminder.nativeIconImageWidth)
+                                  console.log("nativeIconImageUrl: " + reminder.nativeIconImageUrl)
+
+                                  }
+                                  );
 
 class AppodealReactDemo extends Component {
 
     constructor(props) {
         super(props);
         this.state = {
+          showView: false
         };
     }
-    
+
     pressButton1 () {
-        Appodeal.initializeWithApiKey("dee74c5129f53fc629a44a690a02296694e3eef99f2d3a5f", INTERSTITIAL + BANNER + SKIPPABLE_VIDEO + NON_SKIPPABLE_VIDEO + REWARDED_VIDEO);
+        Appodeal.initializeWithApiKey("dee74c5129f53fc629a44a690a02296694e3eef99f2d3a5f", INTERSTITIAL + BANNER + SKIPPABLE_VIDEO + NON_SKIPPABLE_VIDEO + REWARDED_VIDEO + NATIVE_AD);
         Appodeal.enableInterstitialCallbacks(true);
+        Appodeal.setSmartBanners (true);
+        Appodeal.setBannerBackground (true);
+        Appodeal.setBannerAnimation (true);
         Appodeal.enableBannerCallbacks(true);
         Appodeal.enableSkippableVideoCallbacks(true);
         Appodeal.enableRewardedVideoCallbacks(true);
         Appodeal.enableNonSkippableVideoCallbacks(true);
-    }
+        Appodeal.setUserId("12");
+      }
 
     pressButton2 () {
         Appodeal.show(INTERSTITIAL,
@@ -245,7 +292,7 @@ class AppodealReactDemo extends Component {
             }
         );
     }
-    
+
     pressButton3 () {
         Appodeal.show(BANNER_BOTTOM,
             (result) => {
@@ -260,7 +307,7 @@ class AppodealReactDemo extends Component {
             }
         );
     }
-            
+
     pressButton5 () {
         Appodeal.show(SKIPPABLE_VIDEO,
             (result) => {
@@ -268,7 +315,7 @@ class AppodealReactDemo extends Component {
             }
         );
     }
-                
+
     pressButton6 () {
         Appodeal.show(NON_SKIPPABLE_VIDEO,
             (result) => {
@@ -276,7 +323,7 @@ class AppodealReactDemo extends Component {
             }
         );
     }
-                    
+
     pressButton7 () {
         Appodeal.show(REWARDED_VIDEO,
             (result) => {
@@ -287,7 +334,7 @@ class AppodealReactDemo extends Component {
 
     pressButton8 () {
         Appodeal.disableNetworkType ("kAppodealChartboostNetworkName", INTERSTITIAL);
-        Appodeal.setUserId ("id1");
+        Appodeal.setUserId ("12");
         Appodeal.setEmail ("hi@appodeal.com");
         Appodeal.setBirthday ("01-01-1991");
         Appodeal.setAge (20);
@@ -300,7 +347,6 @@ class AppodealReactDemo extends Component {
         Appodeal.hide (INTERSTITIAL);
         Appodeal.setLogging (true);
         Appodeal.setTesting (false);
-        Appodeal.resetUUID ();
         Appodeal.getVersion ((result) => {
         console.log(result);
         });
@@ -309,9 +355,6 @@ class AppodealReactDemo extends Component {
         });
         Appodeal.setCustomRule ("{\"valueNumber\":0,\"valueText\":\"text\"}");
         Appodeal.confirm (INTERSTITIAL);
-        Appodeal.setSmartBanners (false);
-        Appodeal.setBannerBackground (false);
-        Appodeal.setBannerAnimation (false);
         Appodeal.disableLocationPermissionCheck ();
         Appodeal.setAutoCache (INTERSTITIAL, true);
         Appodeal.isPrecache (INTERSTITIAL, (result) => {
@@ -325,13 +368,36 @@ class AppodealReactDemo extends Component {
         });
         Appodeal.cache (INTERSTITIAL);
     }
+pressButton9() {
+        NativeAdViewManagerPlugin.createNativeAdLoader();
+       }
+pressButton10() {
+       NativeAdViewManagerPlugin.createNativeAdViewWithframe(0,0,250,150);
+      }
+
+pressButton11 () {
+         NativeAdViewManagerPlugin.loadNativeAdWithType("APDNativeAdTypeAuto");
+       }
+pressButton12 () {
+              NativeAdViewManagerPlugin.attachToView();
+
+              }
+pressButton13 () {
+              AppodealNativeAdView = requireNativeComponent('AppodealNativeAdView', null);
+              this.setState({showView: true});
+              }
+pressButton14 () {
+              NativeAdViewManagerPlugin.addMediaViewToNativeAdWithFrame(0,0,250,150);
+              }
+
 
   render() {
+
     return (
       <View style={styles.container}>
             <TouchableHighlight onPress={() => this.pressButton1()} style={styles.button} >
             <Text style={styles.buttonText}>
-            INITIALIZE
+            INITIALIZEe
             </Text>
             </TouchableHighlight>
             <TouchableHighlight onPress={() => this.pressButton2()} style={styles.button} >
@@ -369,6 +435,40 @@ class AppodealReactDemo extends Component {
             TEST
             </Text>
             </TouchableHighlight>
+            <TouchableHighlight onPress={() => this.pressButton9()} style={styles.button} >
+            <Text style={styles.buttonText}>
+            NativeAd create loader
+            </Text>
+            </TouchableHighlight>
+            <TouchableHighlight onPress={() => this.pressButton10()} style={styles.button} >
+            <Text style={styles.buttonText}>
+            create native ad view
+            </Text>
+            </TouchableHighlight>
+            <TouchableHighlight onPress={() => this.pressButton11()} style={styles.button} >
+            <Text style={styles.buttonText}>
+            load native ad
+            </Text>
+            </TouchableHighlight>
+            <TouchableHighlight onPress={() => this.pressButton12()} style={styles.button} >
+            <Text style={styles.buttonText}>
+            attach native ad to view
+            </Text>
+            </TouchableHighlight>
+            <TouchableHighlight onPress={() => this.pressButton13()} style={styles.button} >
+            <Text style={styles.buttonText}>
+            Show native ad view
+            </Text>
+            </TouchableHighlight>
+            <TouchableHighlight onPress={() => this.pressButton14()} style={styles.button} >
+            <Text style={styles.buttonText}>
+            add media view to native ad
+            </Text>
+            </TouchableHighlight>
+
+
+
+             {this.state.showView ? <AppodealNativeAdView style={{width: 320, height: 200, backgroundColor: 'red'}} /> : null}
       </View>
     );
   }
@@ -383,6 +483,7 @@ const styles = StyleSheet.create({
                                  },
                                  button:{
                                  height:20,
+                                 width:200,
                                  borderColor: '#05A5D1',
                                  borderWidth:1,
                                  backgroundColor: '#3333',
