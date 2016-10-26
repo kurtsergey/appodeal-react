@@ -13,6 +13,7 @@ const int VIDEO               = 2;
 const int BANNER              = 4;
 const int BANNER_BOTTOM       = 8;
 const int BANNER_TOP          = 16;
+const int NATIVE_AD           = 32;
 const int REWARDED_VIDEO      = 128;
 const int NON_SKIPPABLE_VIDEO = 256;
 
@@ -40,6 +41,10 @@ int nativeAdTypesForType(int adTypes) {
   
   if ((adTypes & NON_SKIPPABLE_VIDEO) >0) {
     nativeAdTypes |= AppodealAdTypeNonSkippableVideo;
+  }
+  
+  if ((adTypes & NATIVE_AD) > 0) {
+    nativeAdTypes |= AppodealAdTypeNativeAd;
   }
 
   return nativeAdTypes;
@@ -183,6 +188,7 @@ RCT_EXPORT_MODULE();
 
 - (void)skippableVideoDidFinish
 {
+  
   [self.bridge.eventDispatcher sendAppEventWithName:@"onSkippableVideoFinished" body:@{@"":@""}];
 }
 
@@ -214,7 +220,12 @@ RCT_EXPORT_MODULE();
 
 - (void)rewardedVideoDidFinish:(NSUInteger)rewardAmount name:(NSString *)rewardName
 {
-  [self.bridge.eventDispatcher sendAppEventWithName:@"onRewardedVideoFinished" body:@{@"rewardAmount":[NSNumber numberWithInteger:rewardAmount],@"rewardName":rewardName}];
+  if (rewardName == nil) {
+    [self.bridge.eventDispatcher sendAppEventWithName:@"onRewardedVideoFinished" body:@{@"rewardAmount":[NSNumber numberWithInteger:0],@"rewardName":@"nil"}];
+  }
+  else {
+    [self.bridge.eventDispatcher sendAppEventWithName:@"onRewardedVideoFinished" body:@{@"rewardAmount":[NSNumber numberWithInteger:rewardAmount],@"rewardName":rewardName}];
+  }
 }
 
 - (void)rewardedVideoDidClick
@@ -225,6 +236,32 @@ RCT_EXPORT_MODULE();
 RCT_EXPORT_METHOD(disableNetworkType:(NSString *)name types:(int)adType)
 {
     dispatch_async(dispatch_get_main_queue(), ^{
+      if ((adType & INTERSTITIAL) > 0) {
+        [Appodeal disableNetworkForAdType:AppodealAdTypeInterstitial name:name];
+      }
+      
+      if ((adType & VIDEO) > 0) {
+        [Appodeal disableNetworkForAdType:AppodealAdTypeSkippableVideo name:name];
+      }
+      
+      if ((adType & BANNER) > 0 ||
+          (adType & BANNER_TOP) > 0 ||
+          (adType & BANNER_BOTTOM) > 0) {
+          [Appodeal disableNetworkForAdType:AppodealAdTypeBanner name:name];
+      }
+      
+      if ((adType & REWARDED_VIDEO) > 0) {
+        [Appodeal disableNetworkForAdType:AppodealAdTypeRewardedVideo name:name];
+      }
+      
+      if ((adType & NON_SKIPPABLE_VIDEO) >0) {
+        [Appodeal disableNetworkForAdType:AppodealAdTypeNonSkippableVideo name:name];
+      }
+      
+      if ((adType & NATIVE_AD) > 0) {
+        [Appodeal disableNetworkForAdType:AppodealAdTypeNativeAd name:name];
+      }
+
         [Appodeal disableNetworkForAdType:nativeAdTypesForType(adType) name:name];
     });
 }
@@ -256,6 +293,7 @@ RCT_EXPORT_METHOD(isPrecache:(int)adType calls:(RCTResponseSenderBlock)callback)
 RCT_EXPORT_METHOD(initializeWithApiKey:(NSString *)appKey types:(int)adType)
 {
   dispatch_async(dispatch_get_main_queue(), ^{
+    [Appodeal setFramework:APDFrameworkReactNative];
     [Appodeal initializeWithApiKey:appKey types:nativeAdTypesForType(adType)];
   });
 }
@@ -353,12 +391,7 @@ RCT_EXPORT_METHOD(setTesting:(BOOL)testingEnabled)
   });
 }
 
-RCT_EXPORT_METHOD(resetUUID)
-{
-  dispatch_async(dispatch_get_main_queue(), ^{
-    [Appodeal resetUUID];
-  });
-}
+
 
 RCT_EXPORT_METHOD(getVersion:(RCTResponseSenderBlock)callback)
 {
