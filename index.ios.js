@@ -387,6 +387,7 @@ pressButton13 () {
               this.setState({showView: true});
               }
 pressButton14 () {
+              NativeAdViewManagerPlugin.attachAdChoicesViewIfExistsWithFrame(0,0,250,150);
               NativeAdViewManagerPlugin.addMediaViewToNativeAdWithFrame(0,0,250,150);
               }
 
