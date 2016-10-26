@@ -132,6 +132,17 @@ RCT_EXPORT_METHOD(attachToView)
   
 }
 
+RCT_EXPORT_METHOD(attachAdChoicesViewIfExistsWithFrame:(int)x y:(int)y width:(int)width height:(int)height)
+{
+  dispatch_async(dispatch_get_main_queue(), ^{
+    if (self.ad.adChoicesView) {
+      [self.ad.adChoicesView setFrame:CGRectMake(x, y, width, height)];
+      [self.AppodealNativeView addSubview:self.ad.adChoicesView];
+    }
+  });
+  
+}
+
 RCT_EXPORT_METHOD(addMediaViewToNativeAdWithFrame:(int)x y:(int)y width:(int)width height:(int)height)
 {
   dispatch_async(dispatch_get_main_queue(), ^{
