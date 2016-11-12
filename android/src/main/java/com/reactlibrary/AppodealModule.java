@@ -182,7 +182,22 @@ public class AppodealModule extends ReactContextBaseJavaModule implements Inters
   }
   
   @ReactMethod
-  public void setCustomRule(String name, String value){
+  public void setCustomStringRule(String name, String value){
+	Appodeal.setCustomRule(name, value);
+  }
+  
+  @ReactMethod
+  public void setCustomBooleanRule(String name, boolean value){
+	Appodeal.setCustomRule(name, value);
+  }
+  
+  @ReactMethod
+  public void setCustomIntegerRule(String name, int value){
+	Appodeal.setCustomRule(name, value);
+  }
+  
+  @ReactMethod
+  public void setCustomDoubleRule(String name, double value){
 	Appodeal.setCustomRule(name, value);
   }
   
