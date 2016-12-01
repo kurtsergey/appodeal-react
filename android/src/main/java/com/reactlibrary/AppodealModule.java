@@ -20,11 +20,10 @@ import com.appodeal.ads.BannerCallbacks;
 import com.appodeal.ads.InterstitialCallbacks;
 import com.appodeal.ads.NonSkippableVideoCallbacks;
 import com.appodeal.ads.RewardedVideoCallbacks;
-import com.appodeal.ads.SkippableVideoCallbacks;
 import com.appodeal.ads.utils.PermissionsHelper.AppodealPermissionCallbacks;
 import com.appodeal.ads.utils.Log;
 
-public class AppodealModule extends ReactContextBaseJavaModule implements InterstitialCallbacks, BannerCallbacks, SkippableVideoCallbacks, NonSkippableVideoCallbacks, RewardedVideoCallbacks, AppodealPermissionCallbacks{
+public class AppodealModule extends ReactContextBaseJavaModule implements InterstitialCallbacks, BannerCallbacks, NonSkippableVideoCallbacks, RewardedVideoCallbacks, AppodealPermissionCallbacks{
 
   private final ReactApplicationContext reactContext;
   
@@ -41,7 +40,6 @@ public class AppodealModule extends ReactContextBaseJavaModule implements Inters
     this.reactContext = reactContext;
 	Appodeal.setInterstitialCallbacks(this);
 	Appodeal.setBannerCallbacks(this);
-	Appodeal.setSkippableVideoCallbacks(this);
 	Appodeal.setNonSkippableVideoCallbacks(this);
 	Appodeal.setRewardedVideoCallbacks(this);
   }
@@ -62,7 +60,6 @@ public class AppodealModule extends ReactContextBaseJavaModule implements Inters
 	constants.put("BANNER_TOP", Appodeal.BANNER_TOP);
 	constants.put("BANNER_BOTTOM", Appodeal.BANNER_BOTTOM);
 	constants.put("NON_SKIPPABLE_VIDEO", Appodeal.NON_SKIPPABLE_VIDEO);
-	constants.put("SKIPPABLE_VIDEO", Appodeal.SKIPPABLE_VIDEO);
 	constants.put("REWARDED_VIDEO", Appodeal.REWARDED_VIDEO);
 	constants.put("GENDER_MALE", UserSettings.Gender.MALE.name());
 	constants.put("GENDER_FEMALE", UserSettings.Gender.FEMALE.name());
@@ -213,7 +210,7 @@ public class AppodealModule extends ReactContextBaseJavaModule implements Inters
   
   @ReactMethod
   public void setOnLoadedTriggerBoth(int adTypes, boolean flag){
-	Appodeal.setOnLoadedTriggerBoth(adTypes, flag);
+	Appodeal.setTriggerOnLoadedOnPrecache(adTypes, flag);
   }
   
   @ReactMethod
@@ -312,6 +309,12 @@ public class AppodealModule extends ReactContextBaseJavaModule implements Inters
 		// TODO Auto-generated method stub
 		sendEventToJS("onInterstitialShown", null);
 	}
+	
+	@Override
+	public void onInterstitialFinished() {
+		// TODO Auto-generated method stub
+		sendEventToJS("onInterstitialFinished", null);
+	}
 
 	@Override
 	public void onBannerClicked() {
@@ -338,38 +341,6 @@ public class AppodealModule extends ReactContextBaseJavaModule implements Inters
 	public void onBannerShown() {
 		// TODO Auto-generated method stub
 		sendEventToJS("onBannerShown", null);
-	}
-
-	@Override
-	public void onSkippableVideoClosed(boolean isFinished) {
-		// TODO Auto-generated method stub
-		WritableMap params = Arguments.createMap();
-		params.putBoolean("isFinished", isFinished);
-		sendEventToJS("onSkippableVideoClosed", params);
-	}
-
-	@Override
-	public void onSkippableVideoFailedToLoad() {
-		// TODO Auto-generated method stub
-		sendEventToJS("onSkippableVideoFailedToLoad", null);
-	}
-
-	@Override
-	public void onSkippableVideoFinished() {
-		// TODO Auto-generated method stub
-		sendEventToJS("onSkippableVideoFinished", null);
-	}
-
-	@Override
-	public void onSkippableVideoLoaded() {
-		// TODO Auto-generated method stub
-		sendEventToJS("onSkippableVideoLoaded", null);
-	}
-
-	@Override
-	public void onSkippableVideoShown() {
-		// TODO Auto-generated method stub
-		sendEventToJS("onSkippableVideoShown", null);
 	}
 
 	@Override
