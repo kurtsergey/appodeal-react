@@ -53,16 +53,6 @@ RCT_EXPORT_METHOD(createNativeAdLoader)
 
 //callbacks
 
-- (void)nativeAdLoader:(APDNativeAdLoader *)loader didLoadNativeAds:(NSArray <__kindof APDNativeAd *> *)nativeAds{
- /* [self.adLoader loadAdWithType:self.adViewType];
-  [self.view setFrame:CGRectMake(self.x, self.y, self.width, self.height)];
-  APDNativeAd * nativeAd = [nativeAds firstObject];
-  if (nativeAd.adChoicesView) {
-    self.ad = nativeAd;
-    [self.view addSubview:nativeAd.adChoicesView];
-  }*/
-}
-
 - (void)nativeAdLoader:(APDNativeAdLoader *)loader didLoadNativeAd:(APDNativeAd *)nativeAd{
   self.ad = nativeAd;
   
