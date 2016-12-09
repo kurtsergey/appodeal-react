@@ -12,6 +12,6 @@
 #import "RCTEventDispatcher.h"
 #import <Appodeal/Appodeal.h>
 
-@interface AppodealPlugin : NSObject <RCTBridgeModule, AppodealBannerDelegate, AppodealInterstitialDelegate, AppodealRewardedVideoDelegate, AppodealNonSkippableVideoDelegate, AppodealSkippableVideoDelegate>
+@interface AppodealPlugin : NSObject <RCTBridgeModule, AppodealBannerDelegate, AppodealInterstitialDelegate, AppodealRewardedVideoDelegate, AppodealNonSkippableVideoDelegate>
 
 @end

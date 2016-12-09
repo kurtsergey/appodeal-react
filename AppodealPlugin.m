@@ -9,7 +9,6 @@
 #import "AppodealPlugin.h"
 
 const int INTERSTITIAL        = 1;
-const int VIDEO               = 2;
 const int BANNER              = 4;
 const int BANNER_BOTTOM       = 8;
 const int BANNER_TOP          = 16;
@@ -22,10 +21,6 @@ int nativeAdTypesForType(int adTypes) {
   
   if ((adTypes & INTERSTITIAL) > 0) {
     nativeAdTypes |= AppodealAdTypeInterstitial;
-  }
-  
-  if ((adTypes & VIDEO) > 0) {
-    nativeAdTypes |= AppodealAdTypeSkippableVideo;
   }
   
   if ((adTypes & BANNER) > 0 ||
@@ -51,17 +46,11 @@ int nativeAdTypesForType(int adTypes) {
 }
 
 int nativeShowStyleForType(int adTypes) {
-  bool isInterstitial = (adTypes & INTERSTITIAL) > 0;
-  bool isVideo = (adTypes & VIDEO) > 0;
-  
-  if (isInterstitial && isVideo) {
-    return AppodealShowStyleVideoOrInterstitial;
-  } else if (isVideo) {
-    return AppodealShowStyleSkippableVideo;
-  } else if (isInterstitial) {
-    return AppodealShowStyleInterstitial;
+ 
+  if ((adTypes & INTERSTITIAL) > 0) {
+        return AppodealShowStyleInterstitial;
   }
-  
+    
   if ((adTypes & BANNER_TOP) > 0) {
     return AppodealShowStyleBannerTop;
   }
@@ -134,6 +123,12 @@ RCT_EXPORT_MODULE();
   [self.bridge.eventDispatcher sendAppEventWithName:@"onInterstitialClicked" body:@{@"":@""}];
 }
 
+- (void)interstitialDidFinish;
+{
+    [self.bridge.eventDispatcher sendAppEventWithName:@"onInterstitialDidFinish" body:@{@"":@""}];
+}
+
+
 // non skippable video
 - (void)nonSkippableVideoDidLoadAd
 {
@@ -165,37 +160,6 @@ RCT_EXPORT_MODULE();
   [self.bridge.eventDispatcher sendAppEventWithName:@"onNonSkippableVideoClicked" body:@{@"":@""}];
 }
 
-// skippable video
-- (void)skippableVideoDidLoadAd
-{
-  [self.bridge.eventDispatcher sendAppEventWithName:@"onSkippableVideoLoaded" body:@{@"":@""}];
-}
-
-- (void)skippableVideoDidFailToLoadAd
-{
-  [self.bridge.eventDispatcher sendAppEventWithName:@"onSkippableVideoFailedToLoad" body:@{@"":@""}];
-}
-
-- (void)skippableVideoDidPresent
-{
-  [self.bridge.eventDispatcher sendAppEventWithName:@"onSkippableVideoShown" body:@{@"":@""}];
-}
-
-- (void)skippableVideoWillDismiss
-{
-  [self.bridge.eventDispatcher sendAppEventWithName:@"onSkippableVideoClosed" body:@{@"":@""}];
-}
-
-- (void)skippableVideoDidFinish
-{
-  
-  [self.bridge.eventDispatcher sendAppEventWithName:@"onSkippableVideoFinished" body:@{@"":@""}];
-}
-
-- (void)skippableVideoDidClick
-{
-  [self.bridge.eventDispatcher sendAppEventWithName:@"onSkippableVideoClicked" body:@{@"":@""}];
-}
 
 // rewarded video
 - (void)rewardedVideoDidLoadAd
@@ -240,10 +204,6 @@ RCT_EXPORT_METHOD(disableNetworkType:(NSString *)name types:(int)adType)
         [Appodeal disableNetworkForAdType:AppodealAdTypeInterstitial name:name];
       }
       
-      if ((adType & VIDEO) > 0) {
-        [Appodeal disableNetworkForAdType:AppodealAdTypeSkippableVideo name:name];
-      }
-      
       if ((adType & BANNER) > 0 ||
           (adType & BANNER_TOP) > 0 ||
           (adType & BANNER_BOTTOM) > 0) {
@@ -266,12 +226,7 @@ RCT_EXPORT_METHOD(disableNetworkType:(NSString *)name types:(int)adType)
     });
 }
 
-RCT_EXPORT_METHOD(disableLocationPermissionCheck)
-{
-  dispatch_async(dispatch_get_main_queue(), ^{
-    [Appodeal disableLocationPermissionCheck];
-  });
-}
+
 
 RCT_EXPORT_METHOD(setAutoCache:(int)adType autoc:(BOOL)autocache)
 {
@@ -322,12 +277,6 @@ RCT_EXPORT_METHOD(enableBannerCallbacks:(BOOL)val)
   });
 }
 
-RCT_EXPORT_METHOD(enableSkippableVideoCallbacks:(BOOL)val)
-{
-  dispatch_async(dispatch_get_main_queue(), ^{
-    [Appodeal setSkippableVideoDelegate:self];
-  });
-}
 
 RCT_EXPORT_METHOD(enableRewardedVideoCallbacks:(BOOL)val)
 {
@@ -450,6 +399,13 @@ RCT_EXPORT_METHOD(confirm:(int)adType)
   dispatch_async(dispatch_get_main_queue(), ^{
     [Appodeal confirmUsage:nativeAdTypesForType(adType)];
   });
+}
+
+RCT_EXPORT_METHOD(setLocationTracking:(BOOL)enabled)
+{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [Appodeal setLocationTracking:enabled];
+    });
 }
 
 RCT_EXPORT_METHOD(setSmartBanners:(BOOL)val)
