@@ -1,6 +1,10 @@
+/* @flow */
+'use strict';
 
-import { NativeModules } from 'react-native';
+import Appodeal from './Appodeal';
+import MrecView from './MRECView';
 
-const { Appodeal } = NativeModules;
-
-export default Appodeal;
+export {
+    Appodeal,
+    MrecView
+};

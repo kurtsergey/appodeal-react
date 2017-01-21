@@ -13,6 +13,8 @@ import com.facebook.react.bridge.Arguments;
 import java.util.Map;
 import java.util.HashMap;
 import android.content.pm.PackageManager;
+import android.app.Activity;
+import javax.annotation.Nullable;
 
 import com.appodeal.ads.Appodeal;
 import com.appodeal.ads.UserSettings;
@@ -20,10 +22,11 @@ import com.appodeal.ads.BannerCallbacks;
 import com.appodeal.ads.InterstitialCallbacks;
 import com.appodeal.ads.NonSkippableVideoCallbacks;
 import com.appodeal.ads.RewardedVideoCallbacks;
+import com.appodeal.ads.MrecCallbacks;
 import com.appodeal.ads.utils.PermissionsHelper.AppodealPermissionCallbacks;
 import com.appodeal.ads.utils.Log;
 
-public class AppodealModule extends ReactContextBaseJavaModule implements InterstitialCallbacks, BannerCallbacks, NonSkippableVideoCallbacks, RewardedVideoCallbacks, AppodealPermissionCallbacks{
+public class AppodealModule extends ReactContextBaseJavaModule implements InterstitialCallbacks, BannerCallbacks, NonSkippableVideoCallbacks, RewardedVideoCallbacks, AppodealPermissionCallbacks, MrecCallbacks{
 
   private final ReactApplicationContext reactContext;
   
@@ -34,6 +37,8 @@ public class AppodealModule extends ReactContextBaseJavaModule implements Inters
   private Callback writeExternalStorage;
   
   private UserSettings settings;
+  
+  private static AppodealModule instance;
 
   public AppodealModule(ReactApplicationContext reactContext) {
     super(reactContext);
@@ -42,6 +47,15 @@ public class AppodealModule extends ReactContextBaseJavaModule implements Inters
 	Appodeal.setBannerCallbacks(this);
 	Appodeal.setNonSkippableVideoCallbacks(this);
 	Appodeal.setRewardedVideoCallbacks(this);
+	Appodeal.setMrecCallbacks(this);
+	instance = this;
+  }
+  
+  public static @Nullable Activity getActivity(){
+	  if(instance != null){
+		  return instance.getCurrentActivity();
+	  }
+	  return null;
   }
 
   @Override
@@ -61,6 +75,7 @@ public class AppodealModule extends ReactContextBaseJavaModule implements Inters
 	constants.put("BANNER_BOTTOM", Appodeal.BANNER_BOTTOM);
 	constants.put("NON_SKIPPABLE_VIDEO", Appodeal.NON_SKIPPABLE_VIDEO);
 	constants.put("REWARDED_VIDEO", Appodeal.REWARDED_VIDEO);
+	constants.put("MREC", Appodeal.MREC);
 	constants.put("GENDER_MALE", UserSettings.Gender.MALE.name());
 	constants.put("GENDER_FEMALE", UserSettings.Gender.FEMALE.name());
 	constants.put("GENDER_OTHER", UserSettings.Gender.OTHER.name());
@@ -429,6 +444,26 @@ public class AppodealModule extends ReactContextBaseJavaModule implements Inters
 	@ReactMethod
 	public void requestAndroidMPermissions(){
 		Appodeal.requestAndroidMPermissions(getCurrentActivity(), this);
+	}
+	
+	@Override
+	public void onMrecLoaded(boolean isPrecache) {
+		sendEventToJS("onMrecLoaded", null);
+	}
+
+	@Override
+	public void onMrecFailedToLoad() {
+		sendEventToJS("onMrecFailedToLoad", null);
+	}
+
+	@Override
+	public void onMrecShown() {
+		sendEventToJS("onMrecShown", null);
+	}
+
+	@Override
+	public void onMrecClicked() {
+		sendEventToJS("onMrecClicked", null);
 	}
   
 }
