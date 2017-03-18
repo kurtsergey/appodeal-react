@@ -22,11 +22,10 @@ import com.appodeal.ads.BannerCallbacks;
 import com.appodeal.ads.InterstitialCallbacks;
 import com.appodeal.ads.NonSkippableVideoCallbacks;
 import com.appodeal.ads.RewardedVideoCallbacks;
-import com.appodeal.ads.MrecCallbacks;
 import com.appodeal.ads.utils.PermissionsHelper.AppodealPermissionCallbacks;
 import com.appodeal.ads.utils.Log;
 
-public class AppodealModule extends ReactContextBaseJavaModule implements InterstitialCallbacks, BannerCallbacks, NonSkippableVideoCallbacks, RewardedVideoCallbacks, AppodealPermissionCallbacks, MrecCallbacks{
+public class AppodealModule extends ReactContextBaseJavaModule implements InterstitialCallbacks, BannerCallbacks, NonSkippableVideoCallbacks, RewardedVideoCallbacks, AppodealPermissionCallbacks{
 
   private final ReactApplicationContext reactContext;
   
@@ -47,7 +46,6 @@ public class AppodealModule extends ReactContextBaseJavaModule implements Inters
 	Appodeal.setBannerCallbacks(this);
 	Appodeal.setNonSkippableVideoCallbacks(this);
 	Appodeal.setRewardedVideoCallbacks(this);
-	Appodeal.setMrecCallbacks(this);
 	instance = this;
   }
   
@@ -445,25 +443,4 @@ public class AppodealModule extends ReactContextBaseJavaModule implements Inters
 	public void requestAndroidMPermissions(){
 		Appodeal.requestAndroidMPermissions(getCurrentActivity(), this);
 	}
-	
-	@Override
-	public void onMrecLoaded(boolean isPrecache) {
-		sendEventToJS("onMrecLoaded", null);
-	}
-
-	@Override
-	public void onMrecFailedToLoad() {
-		sendEventToJS("onMrecFailedToLoad", null);
-	}
-
-	@Override
-	public void onMrecShown() {
-		sendEventToJS("onMrecShown", null);
-	}
-
-	@Override
-	public void onMrecClicked() {
-		sendEventToJS("onMrecClicked", null);
-	}
-  
 }

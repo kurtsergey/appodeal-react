@@ -1,4 +1,4 @@
-import { PropTypes, Component } from 'react';
+import React, { PropTypes, Component } from 'react';
 import { requireNativeComponent, View, DeviceEventEmitter } from 'react-native';
 
 /*var iface = {
@@ -9,20 +9,37 @@ import { requireNativeComponent, View, DeviceEventEmitter } from 'react-native';
   },
 };*/
 
-class iface extends Component{
+
+class MRECView extends Component{
 	constructor(props) {
 		super(props);
-		DeviceEventEmitter.addListener('onMrecShown', (e) => this.forceUpdate());
+	}
+	onMrecLoaded = (e) => {
+		if(!this.props.onLoaded)
+			return;
+		this.props.onLoaded();
 	}
 	render() {
-		return <MrecView {...this.props} />;
+		return (
+			<View stype={this.props.style}>
+				<RMrecView  {...this.props}
+					onMrecLoaded={this.props.onLoaded}
+					onMrecFailedToLoad={this.props.onFailed}
+					onMrecShown={this.props.onShown}
+					onMrecClicked={this.props.onClicked} />
+			</View>
+			);
 	}
 }
 
-iface.propTypes = {
-	fix: PropTypes.string,
+MRECView.propTypes = {
+	onLoaded: React.PropTypes.func,
+	onFailed: React.PropTypes.func,
+	onShown: React.PropTypes.func,
+	onClicked: React.PropTypes.func,
+	...View.propTypes
 }
 
-var MRECView = requireNativeComponent('MrecView', iface);
+const RMrecView = requireNativeComponent('MrecView', MRECView);
 
 export default MRECView;
